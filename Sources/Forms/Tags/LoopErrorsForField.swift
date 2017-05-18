@@ -1,6 +1,11 @@
 import Leaf
 
 public final class LoopErrorsForField: Tag {
+    
+  public func run(tagTemplate: TagTemplate, arguments: ArgumentList) throws -> Node? {
+    return nil
+  }
+
   public let name = "loopErrorsForField"
 
   // Arg1: Fieldset
@@ -10,9 +15,9 @@ public final class LoopErrorsForField: Tag {
   public func run(stem: Stem, context: Context, tagTemplate: TagTemplate, arguments: [Argument]) throws -> Node? {
     guard
       arguments.count == 3,
-      let fieldset = arguments[0].value?.object,
-      let fieldName = arguments[1].value?.string,
-      let constant = arguments[2].value?.string,
+      let fieldset = arguments[0].value(with: stem, in: context)?.object,
+      let fieldName = arguments[1].value(with: stem, in: context)?.string,
+      let constant = arguments[2].value(with: stem, in: context)?.string,
       let errors = fieldset[fieldName]?["errors"]?.array
     else { return nil }
     return .array(errors.map { [constant: $0] })

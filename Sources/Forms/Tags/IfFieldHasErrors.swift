@@ -1,6 +1,11 @@
 import Leaf
 
 public final class IfFieldHasErrors: Tag {
+    
+  public func run(tagTemplate: TagTemplate, arguments: ArgumentList) throws -> Node? {
+    return nil
+  }
+
   public let name = "ifFieldHasErrors"
 
   public func run(stem: Stem, context: Context, tagTemplate: TagTemplate, arguments: [Argument]) throws -> Node? {
@@ -13,8 +18,8 @@ public final class IfFieldHasErrors: Tag {
   public func shouldRender(stem: Stem, context: Context, tagTemplate: TagTemplate, arguments: [Argument], value: Node?) -> Bool {
     guard
       arguments.count == 2,
-      let fieldset = arguments[0].value?.object,
-      let fieldName = arguments[1].value?.string,
+      let fieldset = arguments[0].value(with: stem, in: context)?.object,
+      let fieldName = arguments[1].value(with: stem, in: context)?.string,
       let errors = fieldset[fieldName]?["errors"]?.array
     else { return false }
     return !errors.isEmpty

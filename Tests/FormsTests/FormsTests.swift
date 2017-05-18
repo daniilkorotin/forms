@@ -503,7 +503,7 @@ class FormsTests: XCTestCase {
   // MARK: Leaf tags
 
   func testTagErrorsForField() {
-    let stem = Stem(workingDirectory: "")
+    let stem = Stem(DataFile(workDir: ""))
     stem.register(ErrorsForField())
     let leaf = try! stem.spawnLeaf(raw: "#errorsForField(fieldset, \"fieldName\") { #loop(self, \"message\") { #(message) } }")
     var fieldset = Fieldset(["fieldName": StringField()])
@@ -514,7 +514,7 @@ class FormsTests: XCTestCase {
   }
 
   func testTagIfFieldHasErrors() {
-    let stem = Stem(workingDirectory: "")
+    let stem = Stem(DataFile(workDir: ""))
     stem.register(IfFieldHasErrors())
     let leaf = try! stem.spawnLeaf(raw: "#ifFieldHasErrors(fieldset, \"fieldName\") { HasErrors }")
     do {
@@ -533,7 +533,7 @@ class FormsTests: XCTestCase {
   }
 
   func testTagLoopErrorsForField() {
-    let stem = Stem(workingDirectory: "")
+    let stem = Stem(DataFile(workDir: ""))
     stem.register(LoopErrorsForField())
     let leaf = try! stem.spawnLeaf(raw: "#loopErrorsForField(fieldset, \"fieldName\", \"message\") { #(message) }")
     var fieldset = Fieldset(["fieldName": StringField()])
@@ -545,7 +545,7 @@ class FormsTests: XCTestCase {
   }
 
   func testTagValueForField() {
-    let stem = Stem(workingDirectory: "")
+    let stem = Stem(DataFile(workDir: ""))
     stem.register(ValueForField())
     let leaf = try! stem.spawnLeaf(raw: "#valueForField(fieldset, \"fieldName\")!")
     var fieldset = Fieldset(["fieldName": StringField()])
@@ -556,7 +556,7 @@ class FormsTests: XCTestCase {
   }
 
   func testTagLabelForField() {
-    let stem = Stem(workingDirectory: "")
+    let stem = Stem(DataFile(workDir: ""))
     stem.register(LabelForField())
     let leaf = try! stem.spawnLeaf(raw: "#labelForField(fieldset, \"fieldName\")!")
     let fieldset = Fieldset(["fieldName": StringField(label: "NameLabel")])
@@ -808,37 +808,43 @@ class FormsTests: XCTestCase {
 
 // Mock Driver to test DB validators
 class TestDriver: Driver, Connection {
-    var idKey: String = "id"
-    var idType: IdentifierType = .int
-    var keyNamingConvention: KeyNamingConvention = .snake_case
-    var closed: Bool { return false }
 
-    func query<T : Entity>(_ query: Query<T>) throws -> Node {
-        switch query.action {
-        case .count:
-            // If we have this specific filter consider it's not unique
-            guard query.filters.contains(where: {
-                guard case .compare(let key, let comparison, let value) = $0.method else {
-                    return false
-                }
-                return (key == "name" && comparison == .equals && value == Node("not_unique"))
-            }) else {
-                return 0
-            }
-            return 1
-        default:
-            return 0
-        }
-    }
-    func schema(_ schema: Schema) throws {}
-    @discardableResult
-    public func raw(_ query: String, _ values: [Node] = []) throws -> Node {
-        return .null
-    }
+  var queryLogger: QueryLogger?
 
-    func makeConnection() throws -> Connection {
-        return self
-    }
+  var idKey: String = "id"
+  var idType: IdentifierType = .int
+  var keyNamingConvention: KeyNamingConvention = .snake_case
+  var isClosed: Bool { return false }
+
+  func query<T : Entity>(_ query: Query<T>) throws -> Node {
+//      switch query.action {
+//        
+//        
+//      case .count:
+//          // If we have this specific filter consider it's not unique
+////          guard query.filters.contains(where: {
+////              guard case .compare(let key, let comparison, let value) = $0.method else {
+////                  return false
+////              }
+////              return (key == "name" && comparison == .equals && value == Node("not_unique"))
+////          }) else {
+////              return 0
+////          }
+//          return 1
+//      default:
+//          return 0
+//      }
+    return 0
+  }
+  func schema(_ schema: Schema) throws {}
+  @discardableResult
+  public func raw(_ query: String, _ values: [Node] = []) throws -> Node {
+      return .null
+  }
+  
+  func makeConnection(_ type: ConnectionType) throws -> Connection {
+    return self
+  }
 }
 
 // Mock Entity to test DB validators
